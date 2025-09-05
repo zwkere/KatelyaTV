@@ -39,35 +39,21 @@ interface D1ExecResult {
 
 // 获取全局D1数据库实例
 function getD1Database(): D1Database {
-  // 尝试多种方式访问 D1 数据库
-  
-  // 1. Cloudflare Pages Functions 中通过 env.DB 访问
-  if (typeof globalThis !== 'undefined' && (globalThis as any).DB) {
-    return (globalThis as any).DB as D1Database;
+  // 在 Cloudflare Pages 环境中，DB 通过全局绑定可用
+  if (typeof globalThis !== 'undefined') {
+    // 尝试直接访问全局 DB
+    const globalDB = (globalThis as any).DB;
+    if (globalDB) {
+      return globalDB as D1Database;
+    }
   }
   
-  // 2. 通过 process.env.DB 访问（用于本地开发）
-  if ((process.env as any).DB) {
+  // 回退到 process.env（用于本地开发）
+  if (process.env.DB) {
     return (process.env as any).DB as D1Database;
   }
   
-  // 3. 通过 globalThis.process.env.DB 访问
-  if (typeof globalThis !== 'undefined' && (globalThis as any).process?.env?.DB) {
-    return (globalThis as any).process.env.DB as D1Database;
-  }
-  
-  // 4. 检查 Cloudflare Workers 环境变量
-  if (typeof globalThis !== 'undefined' && (globalThis as any).cloudflare?.env?.DB) {
-    return (globalThis as any).cloudflare.env.DB as D1Database;
-  }
-  
-  // 最后检查是否在测试环境中，如果是则抛出更详细的错误
-  const isDev = process.env.NODE_ENV === 'development';
-  const errorMessage = isDev 
-    ? 'D1 database not available in development. Using D1 requires deployment to Cloudflare Pages.'
-    : 'D1 database binding not configured. Check your Cloudflare Pages settings.';
-    
-  throw new Error(errorMessage);
+  throw new Error('D1 database not available');
 }
 
 export class D1Storage implements IStorage {
