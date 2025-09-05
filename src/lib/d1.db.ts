@@ -39,7 +39,22 @@ interface D1ExecResult {
 
 // 获取全局D1数据库实例
 function getD1Database(): D1Database {
-  return (process.env as any).DB as D1Database;
+  // 在 Cloudflare Pages/Workers 环境中，DB 是全局变量
+  if (typeof globalThis !== 'undefined' && (globalThis as any).DB) {
+    return (globalThis as any).DB as D1Database;
+  }
+  
+  // 回退到 process.env（用于本地开发）
+  if ((process.env as any).DB) {
+    return (process.env as any).DB as D1Database;
+  }
+  
+  // 最后尝试从 globalThis.process.env
+  if (typeof globalThis !== 'undefined' && (globalThis as any).process?.env?.DB) {
+    return (globalThis as any).process.env.DB as D1Database;
+  }
+  
+  throw new Error('D1 database not available. Make sure DB binding is configured.');
 }
 
 export class D1Storage implements IStorage {
