@@ -1,14 +1,19 @@
 name = "katelyatv"
 compatibility_date = "2024-09-01"
 compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
 
-# 默认开发环境数据库配置
-[[d1_databases]]
+# 生产环境 D1 数据库配置
+[[env.production.d1_databases]]
 binding = "DB"
 database_name = "katelyatv-db"
 database_id = "6d580637-1f87-4ddf-8b4d-3d97254b4c33"
 
-[env.production]
+# 预览环境也使用相同的数据库
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "katelyatv-db"
+database_id = "6d580637-1f87-4ddf-8b4d-3d97254b4c33"
 name = "katelyatv"
 
 [env.production.vars]
